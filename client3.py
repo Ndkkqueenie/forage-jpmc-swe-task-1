@@ -20,6 +20,7 @@
 
 import json
 import random
+import time
 import urllib.request
 
 # Server API URLs
@@ -35,14 +36,18 @@ def getDataPoint(quote):
     stock = quote['stock']
     bid_price = float(quote['top_bid']['price'])
     ask_price = float(quote['top_ask']['price'])
-    price = bid_price
+    price = (bid_price+ask_price) / 2
     return stock, bid_price, ask_price, price
 
 
 def getRatio(price_a, price_b):
     """ Get ratio of price_a and price_b """
     """ ------------- Update this function ------------- """
-    return 1
+    """ Also created some tests for the function in client_test.py """
+    if price_b == 0:
+        raise ValueError("price_b cannot be zero")
+        # when price_b is zero, we raise a ValueError
+    return price_a / price_b
 
 
 # Main
@@ -52,8 +57,21 @@ if __name__ == "__main__":
         quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
 
         """ ----------- Update to get the ratio --------------- """
+        prices = {}
         for quote in quotes:
             stock, bid_price, ask_price, price = getDataPoint(quote)
+            prices[stock] = price
             print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
 
-        print("Ratio %s" % getRatio(price, price))
+        stock_a = "ABC"  # Replace with the desired stock symbol
+        stock_b = "DEF"  # Replace with the desired stock symbol
+
+        if stock_a in prices and stock_b in prices:
+            # Calculate and print the ratio for the specified stocks
+            ratio = getRatio(prices[stock_a], prices[stock_b])
+            print("Ratio between %s and %s: %s" % (stock_a, stock_b, ratio))
+        else:
+            print("One or both of the specified stocks not found in the quotes.")
+
+        # Wait for N seconds before the next iteration
+        time.sleep(N)
